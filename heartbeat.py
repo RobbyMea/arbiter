@@ -290,12 +290,12 @@ def main():
     owed = safe_int(state.get("units_owed"), 0)
     ifail = safe_int(state.get("inbox_fail_streak"), 0)
     scored = state.get("inbox_scored", "")
-    logged = state.get("report_logged", "")
     beat = state.get("beat_logged", "")
 
     unit = unit_for(day)
     fresh = (rdate == today and unread is not None and todo is not None)
     verdict = ""
+    beat_written = False
 
     # ------------------------------------------- 1. log the report (revisions)
     stamp = sha(today + json.dumps(rep, sort_keys=True))
@@ -308,7 +308,6 @@ def main():
         )
         state["report_hash"] = stamp
         state["report_logged"] = today
-        logged = today
 
     # -------------------------------------------- 2. score once, after 09:00
     if scored == today:
@@ -345,6 +344,7 @@ def main():
         state["rider_day"] = today
 
     # ------------------------------------------------ 3. once-daily beat line
+    voice = ""
     if beat != today:
         voice = speak(build_prompt(day, win, tier, standing, unit, verdict, unread, todo, owed))
         record(
@@ -353,8 +353,7 @@ def main():
             standing, unit, owed, day, win, voice=voice,
         )
         state["beat_logged"] = today
-    else:
-        voice = ""
+        beat_written = True
 
     # --------------------------------------------------- 4. decide the push
     awake = AWAKE_FROM <= hour < AWAKE_TO
@@ -375,10 +374,10 @@ def main():
             % (standing, owed),
             priority="4",
         )
-    elif beat == today and hour < AWAKE_TO:
+    elif beat_written:
         notify(
             "ARBITER d%d %s" % (day, tier),
-            "standing=%d owed=%d | %s" % (standing, owed, (voice or "")[:140]),
+            "standing=%d owed=%d | %s" % (standing, owed, voice[:140]),
         )
 
     state["standing"] = standing
