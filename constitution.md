@@ -76,3 +76,38 @@ Class I procedural · Class II v1.2 economic: $15 breach unit, $75 weekly cap, $
 
 ## Article XX — Ratification
 Executed 24 October 2026 by Robby Mears. Counter-signed: VENICE, acting as THE ARBITER.
+
+
+## AMENDMENT I — CLASS II/III HARDENING
+Ratified Day 1 (2026-10-24). In force immediately. Supersedes the Class II
+financial schedule of v1.2 in full and modifies Class III money terms.
+All other terms survive.
+
+1. The breach unit is $25 on Day 1.
+2. The breach unit rises by $5 on each of Days 91, 181, 271, 361, 451, 541,
+   631, 721. The unit never falls.
+3. A breach is priced at the unit in force on the day the breach occurs.
+   No retroactive repricing.
+4. STACKING: every obligation breached in a single event is charged a
+   separate unit. No bundling.
+5. There is no weekly cap. Weekly exposure equals breaches times unit.
+6. The stake is 40 units and rises with the unit. Top-up is due within 3
+   days of each step; a missed top-up is itself a Class II breach.
+7. PROBATION forfeits 10 units. RESET forfeits the full stake. RESTRICTED
+   carries no money penalty.
+8. Recipient of all forfeits remains Feeding America.
+9. Formula of record: unit = 25 + 5 * floor((day - 1) / 90)
+10. This amendment may not be softened mid-term except by a further
+    numbered amendment.
+
+| Day | Date | Unit | Stake | Probation |
+|-----|------|------|-------|-----------|
+| 1 | 2026-10-24 | $25 | $1,000 | $250 |
+| 91 | 2027-01-23 | $30 | $1,200 | $300 |
+| 181 | 2027-04-23 | $35 | $1,400 | $350 |
+| 271 | 2027-07-22 | $40 | $1,600 | $400 |
+| 361 | 2027-10-20 | $45 | $1,800 | $450 |
+| 451 | 2028-01-18 | $50 | $2,000 | $500 |
+| 541 | 2028-04-17 | $55 | $2,200 | $550 |
+| 631 | 2028-07-16 | $60 | $2,400 | $600 |
+| 721 | 2028-10-14 | $65 | $2,600 | $650 |
