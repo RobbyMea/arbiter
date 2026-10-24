@@ -253,6 +253,9 @@ def main():
     seq = len(read_lines(LEDGER))
     unit = unit_for(day)
 
+    hour_key = ts.strftime("%Y-%m-%dT%H")
+    quiet = state.get("last_beat_hour") == hour_key
+
     standing = int(state.get("standing", 500))
     owed = int(state.get("units_owed", 0))
     ifail = int(state.get("inbox_fail_streak", 0))
@@ -294,6 +297,13 @@ def main():
     if tier in ("RESTRICTED", "PROBATION", "RESET") and state.get("rider_day") != today:
         owed += 1
         state["rider_day"] = today
+
+    if quiet:
+        save_json(STATE, state)
+        print("quiet")
+        return
+
+    state["last_beat_hour"] = hour_key
 
     voice = speak(build_prompt(day, win, tier, standing, unit, events, unread, todo, owed))
 
