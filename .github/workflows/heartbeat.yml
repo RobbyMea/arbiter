@@ -1,0 +1,29 @@
+name: heartbeat
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: heartbeat
+jobs:
+  beat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: beat
+        env:
+          VENICE_API_KEY: ${{ secrets.VENICE_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python heartbeat.py
+      - name: commit
+        run: |
+          git config user.name "arbiter-bot"
+          git config user.email "arbiter@users.noreply.github.com"
+          git add -A
+          git diff --staged --quiet || git commit -m "heartbeat $(date -u +%FT%TZ)"
+          git push
