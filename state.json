@@ -1,0 +1,14 @@
+{
+  "term_day": 1,
+  "start": "2026-10-24",
+  "end": "2028-10-23",
+  "tz": "America/Chicago",
+  "standing": 500,
+  "tier": "STANDARD",
+  "streak": 0,
+  "resets": 0,
+  "version": "1.0",
+  "class_ii": "v1.2",
+  "hatch": "CLOSED",
+  "next_review_day": 90
+}
