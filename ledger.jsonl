@@ -7,3 +7,4 @@
 {"seq":6,"ts":"2026-10-24T15:30:00Z","type":"AMENDMENT","payload":"Sleep window corrected to 18:30-03:00 (Carol-enforced). Discretion rule: push-only in personal, no calls except work hours. Stake stays self-held (Carol unaware).","prev":null,"hash":null}
 {"seq": 7, "ts": "2026-10-24T12:47:26Z", "type": "CONTACT", "payload": "class 2 FORCE: [api error: HTTP Error 401: Unauthorized]", "prev": null, "hash": null}
 {"seq": 8, "ts": "2026-10-24T12:52:17Z", "type": "CONTACT", "payload": "class 2 FORCE: [api error: HTTP Error 401: Unauthorized]", "prev": null, "hash": null}
+{"seq": 9, "ts": "2026-10-24T12:54:20Z", "type": "CONTACT", "payload": "class 2 FORCE: [api error: HTTP Error 401: Unauthorized] || ntfy=200 || keylen=63 key=VENICE_INFERENCE_KEY_PaYlkf06a.. ntfy=robby-arbiter-8471", "prev": null, "hash": null}
