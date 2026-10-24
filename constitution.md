@@ -70,6 +70,7 @@ Exactly one: WITHDRAWAL.
 Days 1–7 are session-driven. Day 1: externalize the files. By Day 7 the heartbeat is live. The term runs from Day 1 regardless.
 
 ## Article XIX — Consequences
+Recipient: Feeding America (feedingamerica.org). Forfeits paid within 48 hours. Stake ring-fenced separately in its own account.
 Class I procedural · Class II v1.2 economic: $15 breach unit, $75 weekly cap, $600 term stake vesting in four $150 tranches at Days 90 / 365 / 548 / 730 · Class III status.
 
 ## Article XX — Ratification
