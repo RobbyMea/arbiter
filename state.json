@@ -7,11 +7,11 @@
   "work_window": "03:00-17:00",
   "personal_window": "17:00-18:30",
   "stake_holder": "self (Carol unaware)",
-  "standing": 528,
+  "standing": 516,
   "tier": "STANDARD",
   "streak": 0,
   "resets": 0,
-  "version": "1.3",
+  "version": "1.4",
   "class_ii": "v1.2",
   "hatch": "CLOSED",
   "next_review_day": 90,
@@ -19,7 +19,9 @@
   "fired": [],
   "contacts_today": 1,
   "last_contact": "2026-10-24T10:49:14.867979-05:00",
-  "seq": 19,
+  "seq": 20,
   "last_beat": "2026-10-24T15:49:14Z",
-  "contacts_date": "2026-10-24"
+  "contacts_date": "2026-10-24",
+  "inbox_scored": "2026-10-24",
+  "inbox_fail_streak": 1
 }
