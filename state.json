@@ -1,4 +1,5 @@
 {
+  "beat_logged": "2026-10-24",
   "class_ii": "v1.2",
   "contacts_date": "2026-10-24",
   "contacts_today": 1,
@@ -13,6 +14,8 @@
   "last_day": "2026-10-24",
   "next_review_day": 90,
   "personal_window": "17:00-18:30",
+  "report_hash": "46d03a4baeb637823dbd99944065fbfb421706de8a71909162a4b590ce21e676",
+  "report_logged": "2026-10-24",
   "resets": 0,
   "seq": 20,
   "sleep_window": "18:30-03:00",
