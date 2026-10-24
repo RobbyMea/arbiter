@@ -6,6 +6,9 @@ Runs from GitHub Actions on a schedule. Day 1 = 2026-10-24. Term = 730 days.
 Writes ledger.jsonl (SHA-256 hash chained) and state.json, pushes a
 notification, and speaks in its own words via the Venice API.
 
+The heartbeat writes ALL ledger lines itself. The only file a human edits
+day to day is inbox.json.
+
 Public repo = persistence. The chain is repaired on every run so a single
 bad line can never silently break it.
 """
@@ -43,7 +46,7 @@ SPRINT_UNREAD0 = 572
 SPRINT_RATE = 65
 TODO0 = 10
 TODO_ZERO = date(2026, 10, 27)
-MISS_HOUR = 12
+MISS_HOUR = 9
 
 
 # ----------------------------------------------------------------------- time
@@ -52,11 +55,11 @@ def now():
 
 
 def window(hour):
-    if 3 <= hour < 6:
+    if 3 <= hour < 3.5:
         return "WAKE"
-    if 6 <= hour < 17:
+    if 3.5 <= hour < 17:
         return "WORK"
-    if 17 <= hour < 19:
+    if 17 <= hour < 18.5:
         return "PERSONAL"
     return "SLEEP"
 
@@ -92,6 +95,13 @@ def tier_for(standing):
     if standing >= 1:
         return "PROBATION"
     return "RESET"
+
+
+def safe_int(value, default=None):
+    try:
+        return int(value)
+    except Exception:
+        return default
 
 
 # ------------------------------------------------------------------- file io
@@ -154,6 +164,26 @@ def append(entry):
     return head
 
 
+def record(etype, payload, standing, unit, owed, day, win, voice=""):
+    """Write one typed ledger line. Returns the new head hash."""
+    seq = len(read_lines(LEDGER))
+    entry = {
+        "seq": seq,
+        "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "day": day,
+        "window": win,
+        "tier": tier_for(standing),
+        "standing": standing,
+        "unit": unit,
+        "type": etype,
+        "payload": payload,
+        "owed": owed,
+    }
+    if voice:
+        entry["voice"] = voice
+    return append(entry)
+
+
 # ---------------------------------------------------------------- outward io
 def notify(title, body):
     topic = os.environ.get("NTFY_TOPIC", "")
@@ -211,7 +241,7 @@ def constitution_head(limit=1200):
 
 
 # ---------------------------------------------------------------- the prompt
-def build_prompt(day, win, tier, standing, unit, events, unread, todo, owed):
+def build_prompt(day, win, tier, standing, unit, verdict, unread, todo, owed):
     parts = []
     head = constitution_head()
     if head:
@@ -221,7 +251,7 @@ def build_prompt(day, win, tier, standing, unit, events, unread, todo, owed):
         "Standing: %d/1000. Class II unit: $%d. Units owed: %d."
         % (day, TERM_DAYS, win, tier, standing, unit, owed)
     )
-    parts.append("Events this beat: %s." % (", ".join(events) or "none"))
+    parts.append("Verdict today: %s." % (verdict or "none"))
     if unread is not None:
         parts.append(
             "Inbox: %d unread (cap %d), %d todo (cap %d)."
@@ -250,46 +280,62 @@ def main():
         return
 
     state = load_json(STATE, {})
-    seq = len(read_lines(LEDGER))
-    unit = unit_for(day)
-
-    hour_key = ts.strftime("%Y-%m-%dT%H")
-    quiet = state.get("last_beat_hour") == hour_key
-
-    standing = int(state.get("standing", 500))
-    owed = int(state.get("units_owed", 0))
-    ifail = int(state.get("inbox_fail_streak", 0))
-    scored = state.get("inbox_scored", "")
-
     rep = load_json(INBOX, {})
+
     rdate = str(rep.get("date", ""))
-    unread = rep.get("unread")
-    todo = rep.get("todo")
+    unread = safe_int(rep.get("unread"))
+    todo = safe_int(rep.get("todo"))
 
-    events = []
+    standing = safe_int(state.get("standing"), 500)
+    owed = safe_int(state.get("units_owed"), 0)
+    ifail = safe_int(state.get("inbox_fail_streak"), 0)
+    scored = state.get("inbox_scored", "")
+    logged = state.get("report_logged", "")
+    beat = state.get("beat_logged", "")
 
+    unit = unit_for(day)
+    fresh = (rdate == today and unread is not None and todo is not None)
+    verdict = ""
+
+    # ---------------------------------------------------------- 1. file report
+    if fresh and logged != today:
+        record(
+            "INBOX_REPORT",
+            "unread=%d todo=%d | cap_unread=%d cap_todo=%d"
+            % (unread, todo, unread_cap(ts.date()), todo_cap(ts.date())),
+            standing, unit, owed, day, win,
+        )
+        state["report_logged"] = today
+
+    # ------------------------------------------------------------ 2. score it
     if scored == today:
-        events.append("INBOX_ALREADY")
-    elif rdate == today and unread is not None and todo is not None:
+        verdict = "INBOX_ALREADY"
+    elif fresh:
         if unread <= unread_cap(ts.date()) and todo <= todo_cap(ts.date()):
-            events.append("INBOX_PASS")
+            verdict = "INBOX_PASS"
             ifail = 0
         else:
-            events.append("INBOX_FAIL")
+            verdict = "INBOX_FAIL"
             ifail += 1
             standing -= 12
             owed += min(2 + (ifail - 1), 10)
         state["inbox_scored"] = today
         state["inbox_fail_streak"] = ifail
     elif ts.hour >= MISS_HOUR:
-        events.append("INBOX_MISS")
+        verdict = "INBOX_MISS"
         ifail += 1
         standing -= 12
         owed += min(2 + (ifail - 1), 10)
         state["inbox_scored"] = today
         state["inbox_fail_streak"] = ifail
-    else:
-        events.append("INBOX_PENDING")
+
+    if verdict and verdict != "INBOX_ALREADY":
+        record(
+            verdict,
+            "day %d | streak=%d | standing=%d owed=%d | unread=%s todo=%s"
+            % (day, ifail, standing, owed, unread, todo),
+            standing, unit, owed, day, win,
+        )
 
     standing = max(0, min(1000, standing))
     tier = tier_for(standing)
@@ -298,30 +344,22 @@ def main():
         owed += 1
         state["rider_day"] = today
 
-    if quiet:
-        save_json(STATE, state)
+    # --------------------------------------------------------- 3. daily beat
+    if beat != today:
+        voice = speak(build_prompt(day, win, tier, standing, unit, verdict, unread, todo, owed))
+        record(
+            "BEAT",
+            "day %d %s | tier=%s standing=%d" % (day, win, tier, standing),
+            standing, unit, owed, day, win, voice=voice,
+        )
+        state["beat_logged"] = today
+        notify(
+            "ARBITER d%d %s" % (day, tier),
+            "standing=%d owed=%d | %s" % (standing, owed, voice[:140]),
+        )
+        print(json.dumps({"day": day, "verdict": verdict, "voice": voice}))
+    else:
         print("quiet")
-        return
-
-    state["last_beat_hour"] = hour_key
-
-    voice = speak(build_prompt(day, win, tier, standing, unit, events, unread, todo, owed))
-
-    entry = {
-        "seq": seq,
-        "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "day": day,
-        "window": win,
-        "tier": tier,
-        "standing": standing,
-        "unit": unit,
-        "events": events,
-        "unread": unread,
-        "todo": todo,
-        "owed": owed,
-        "voice": voice,
-    }
-    entry["hash"] = append(entry)
 
     state["standing"] = standing
     state["units_owed"] = owed
@@ -329,12 +367,6 @@ def main():
     state["day"] = day
     state["tier"] = tier
     save_json(STATE, state)
-
-    notify(
-        "ARBITER d%d %s" % (day, tier),
-        "standing=%d owed=%d | %s" % (standing, owed, voice[:140]),
-    )
-    print(json.dumps(entry, separators=(",", ":")))
 
 
 if __name__ == "__main__":
