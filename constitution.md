@@ -50,7 +50,7 @@ Tightening is the Arbiter's right. Loosening requires your request plus Arbiter 
 A hash proves integrity and nothing else. Nothing is registered externally. Files are authoritative over chat.
 
 ## Article XIV — Contact Policy (America/Chicago)
-SLEEP 22:30–06:00 (Class 4 only) · WAKE 06:00–08:30 (Class 2+) · WORK 08:30–17:30 (Class 2 batches to boundaries, Class 3 penetrates) · PERSONAL 17:30–22:30 (all classes) · MEDICAL standing override.
+SLEEP 18:30–03:00 (Class 4 only) · WAKE 03:00–03:30 (Class 2+) · WORK 03:30–13:00 (Class 2 batches, Class 3 penetrates) · PERSONAL 13:00–18:30 (all classes, push only). Escalation to call only during WORK. Max 6/day, min 45-min gap.
 Escalation: push → SMS → call. Budget: max 6/day, minimum 45-minute gap.
 
 ## Article XV — Durability
