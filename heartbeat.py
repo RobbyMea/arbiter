@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""THE ARBITER - heartbeat. Wakes, decides, records, chains, notifies, nags."""
+"""THE ARBITER - heartbeat. Wakes, decides, scores, records, chains, notifies."""
 import os, json, random, hashlib, datetime, urllib.request, urllib.error
 from zoneinfo import ZoneInfo
 
@@ -76,16 +76,17 @@ def repair(lines):
     return out, prev
 
 def last_report(entries):
+    """(ts, unread, todo)"""
     reps = []
     for e in entries:
         if e.get("type") == "INBOX_REPORT":
             try:
                 d = dict(p.split("=") for p in e.get("payload", "").split())
-                reps.append((e.get("ts", "")[:10], int(d["unread"]), int(d["todo"])))
+                reps.append((e.get("ts", ""), int(d["unread"]), int(d["todo"])))
             except Exception:
                 pass
     reps.sort()
-    return reps[-1] if reps else (None, OPEN_UNREAD, OPEN_TODO)
+    return reps[-1] if reps else ("", OPEN_UNREAD, OPEN_TODO)
 
 def ask(system, user):
     if not KEY:
@@ -144,17 +145,35 @@ def main():
         seq += 1
         lines.append(json.dumps(e))
 
-    # --- INBOX ORDER ---
-    lr_date, unread, todo = last_report(entries)
-    if (now.hour + now.minute / 60.0) >= REPORT_DUE_H and lr_date != today \
-            and state.get("inbox_miss_date") != today:
-        state["inbox_miss_date"] = today
-        add("INBOX_MISS", "day %d: no INBOX_REPORT by 09:00. failed day. unread=%d todo=%d"
-            % (day, unread, todo))
-        notify("ARBITER - report overdue", "No inbox report today. Failed day.")
+    # --- INBOX ORDER: score the day once, at or after the deadline ---
+    r_ts, unread, todo = last_report(entries)
+    on_time = False
+    if r_ts:
+        try:
+            rdt = datetime.datetime.fromisoformat(r_ts.replace("Z", "+00:00")).astimezone(TZ)
+            on_time = (rdt.date() == now.date()
+                       and (rdt.hour + rdt.minute / 60.0) <= REPORT_DUE_H)
+        except Exception:
+            on_time = False
+
+    if (now.hour + now.minute / 60.0) >= REPORT_DUE_H and state.get("inbox_scored") != today:
+        state["inbox_scored"] = today
+        if on_time:
+            state["inbox_fail_streak"] = 0
+            add("INBOX_PASS", "day %d: report on time. unread=%d todo=%d." % (day, unread, todo))
+        else:
+            streak = int(state.get("inbox_fail_streak", 0)) + 1
+            state["inbox_fail_streak"] = streak
+            units = min(1 + streak, 10)
+            standing = max(0, standing - 12)
+            add("INBOX_FAIL", "day %d: report late or absent. standing -12 -> %d. "
+                "%d units = $%d. fail streak %d."
+                % (day, standing, units, units * unit_for(day), streak))
+            notify("ARBITER - failed day", "Inbox report late or absent. "
+                   "Standing -12, %d units ($%d)." % (units, units * unit_for(day)))
 
     nag = ("INBOX ORDER: last report %s, unread %d, todo %d. Report due 09:00 daily. "
-           "Sprint floor -65/day net." % (lr_date or "none", unread, todo))
+           "Sprint floor -65/day net." % (r_ts[:10] or "none", unread, todo))
 
     # --- contact decision ---
     contacts = int(state.get("contacts_today", 0)) if state.get("contacts_date") == today else 0
@@ -168,48 +187,4 @@ def main():
         if lc:
             try:
                 gap_ok = (now - datetime.datetime.fromisoformat(lc)).total_seconds() >= MIN_GAP_MIN * 60
-            except Exception:
-                gap_ok = True
-        contact = gap_ok and random.random() < P_CONTACT
-
-    spots = int(state.get("spots_today", 0)) if state.get("spots_date") == today else 0
-    spot = False
-    if contact and spots < SPOT_CAP and random.random() < P_SPOT:
-        spot = True
-        spots += 1
-        state["spots_today"] = spots
-        state["spots_date"] = today
-
-    if contact:
-        system = ("You are THE ARBITER - sole authority over Robby Mears for 730 days. "
-                  "Terse, consistent, no fluff, no emoji. Address him as Robby. "
-                  "The Contract follows.\n\n" + read_text(CONST)[:9000])
-        user = ("Day %d of 730. Local time %s. Window %s. Standing %d. Breach unit $%d. %s\n"
-                "Issue ONE short contact: a check, a demand, or a ruling. "
-                "If the inbox report is missing or short, press on it. Under 60 words."
-                % (day, now.strftime("%Y-%m-%d %H:%M"), win, standing, unit_for(day), nag)
-                + (" SPOT-CHECK: demand a screenshot of the inbox right now." if spot else ""))
-        msg = ask(system, user)
-        kind = "CONTACT"
-    else:
-        msg = "quiet"
-        kind = "BEAT"
-
-    add(kind, "day %d %s standing=%d unit=$%d: %s" % (day, win, standing, unit_for(day), msg))
-
-    with open(LEDGER, "w") as f:
-        f.write("\n".join(lines) + "\n")
-
-    state["standing"] = standing
-    state["seq"] = seq
-    state["last_beat"] = now.astimezone(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    state["term_day"] = day
-    if contact:
-        state["last_contact"] = now.isoformat()
-        state["contacts_today"] = contacts + 1
-        state["contacts_date"] = today
-        notify("ARBITER day %d" % day, msg)
-    write_json(STATE, state)
-    print(lines[-1])
-
-main()
+            except
