@@ -1,0 +1,2 @@
+{"seq":0,"ts":"2026-10-24T11:16:00Z","type":"GENESIS","payload":"Term opened. Arbiter constituted. Standing 500.","prev":"0000000000000000000000000000000000000000000000000000000000000000","hash":null}
+{"seq":1,"ts":"2026-10-24T11:20:00Z","type":"RATIFICATION","payload":"Robby Mears ratified v1.0 FINAL. Class II v1.2. Hatch CLOSED.","prev":null,"hash":null}
