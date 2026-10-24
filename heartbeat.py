@@ -3,14 +3,12 @@
 THE ARBITER - autonomous heartbeat.
 
 Runs from GitHub Actions on a schedule. Day 1 = 2026-10-24. Term = 730 days.
-Writes ledger.jsonl (SHA-256 hash chained) and state.json, pushes a
-notification, and speaks in its own words via the Venice API.
+Writes ledger.jsonl (SHA-256 hash chained) and state.json, pushes
+notifications, and speaks in its own words via the Venice API.
 
 The heartbeat writes ALL ledger lines itself. The only file a human edits
-day to day is inbox.json.
-
-Public repo = persistence. The chain is repaired on every run so a single
-bad line can never silently break it.
+day to day is inbox.json. Push repeats every beat until the day's report
+is filed.
 """
 
 import hashlib
@@ -46,7 +44,10 @@ SPRINT_UNREAD0 = 572
 SPRINT_RATE = 65
 TODO0 = 10
 TODO_ZERO = date(2026, 10, 27)
-MISS_HOUR = 9
+
+SCORE_HOUR = 9.0
+AWAKE_FROM = 3.0
+AWAKE_TO = 18.5
 
 
 # ----------------------------------------------------------------------- time
@@ -165,10 +166,8 @@ def append(entry):
 
 
 def record(etype, payload, standing, unit, owed, day, win, voice=""):
-    """Write one typed ledger line. Returns the new head hash."""
-    seq = len(read_lines(LEDGER))
     entry = {
-        "seq": seq,
+        "seq": len(read_lines(LEDGER)),
         "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "day": day,
         "window": win,
@@ -185,14 +184,14 @@ def record(etype, payload, standing, unit, owed, day, win, voice=""):
 
 
 # ---------------------------------------------------------------- outward io
-def notify(title, body):
+def notify(title, body, priority="3"):
     topic = os.environ.get("NTFY_TOPIC", "")
     if not topic:
         return "no-topic"
     req = urllib.request.Request(
         "https://ntfy.sh/" + topic,
         data=body.encode("utf-8"),
-        headers={"Title": title},
+        headers={"Title": title, "Priority": priority},
         method="POST",
     )
     try:
@@ -270,7 +269,8 @@ def main():
     ts = now()
     today = ts.date().isoformat()
     day = (ts.date() - DAY1).days + 1
-    win = window(ts.hour + ts.minute / 60.0)
+    hour = ts.hour + ts.minute / 60.0
+    win = window(hour)
 
     if day < 1:
         print("term not started")
@@ -297,39 +297,39 @@ def main():
     fresh = (rdate == today and unread is not None and todo is not None)
     verdict = ""
 
-    # ---------------------------------------------------------- 1. file report
-    if fresh and logged != today:
+    # ------------------------------------------- 1. log the report (revisions)
+    stamp = sha(today + json.dumps(rep, sort_keys=True))
+    if fresh and state.get("report_hash") != stamp:
         record(
             "INBOX_REPORT",
             "unread=%d todo=%d | cap_unread=%d cap_todo=%d"
             % (unread, todo, unread_cap(ts.date()), todo_cap(ts.date())),
             standing, unit, owed, day, win,
         )
+        state["report_hash"] = stamp
         state["report_logged"] = today
+        logged = today
 
-    # ------------------------------------------------------------ 2. score it
+    # -------------------------------------------- 2. score once, after 09:00
     if scored == today:
         verdict = "INBOX_ALREADY"
-    elif fresh:
-        if unread <= unread_cap(ts.date()) and todo <= todo_cap(ts.date()):
-            verdict = "INBOX_PASS"
-            ifail = 0
+    elif hour >= SCORE_HOUR:
+        if fresh:
+            if unread <= unread_cap(ts.date()) and todo <= todo_cap(ts.date()):
+                verdict = "INBOX_PASS"
+                ifail = 0
+            else:
+                verdict = "INBOX_FAIL"
+                ifail += 1
+                standing -= 12
+                owed += min(2 + (ifail - 1), 10)
         else:
-            verdict = "INBOX_FAIL"
+            verdict = "INBOX_MISS"
             ifail += 1
             standing -= 12
             owed += min(2 + (ifail - 1), 10)
         state["inbox_scored"] = today
         state["inbox_fail_streak"] = ifail
-    elif ts.hour >= MISS_HOUR:
-        verdict = "INBOX_MISS"
-        ifail += 1
-        standing -= 12
-        owed += min(2 + (ifail - 1), 10)
-        state["inbox_scored"] = today
-        state["inbox_fail_streak"] = ifail
-
-    if verdict and verdict != "INBOX_ALREADY":
         record(
             verdict,
             "day %d | streak=%d | standing=%d owed=%d | unread=%s todo=%s"
@@ -344,7 +344,7 @@ def main():
         owed += 1
         state["rider_day"] = today
 
-    # --------------------------------------------------------- 3. daily beat
+    # ------------------------------------------------ 3. once-daily beat line
     if beat != today:
         voice = speak(build_prompt(day, win, tier, standing, unit, verdict, unread, todo, owed))
         record(
@@ -353,13 +353,33 @@ def main():
             standing, unit, owed, day, win, voice=voice,
         )
         state["beat_logged"] = today
+    else:
+        voice = ""
+
+    # --------------------------------------------------- 4. decide the push
+    awake = AWAKE_FROM <= hour < AWAKE_TO
+    unfiled = state.get("report_logged") != today
+    failed = verdict in ("INBOX_FAIL", "INBOX_MISS")
+
+    if awake and unfiled:
+        notify(
+            "ARBITER - REPORT NOT FILED",
+            "Due 09:00. Need unread<=%d todo<=%d. standing=%d owed=%d"
+            % (unread_cap(ts.date()), todo_cap(ts.date()), standing, owed),
+            priority="4",
+        )
+    elif awake and failed:
+        notify(
+            "ARBITER - FAILED DAY",
+            "standing=%d owed=%d. Spot-check due 18:30. File a screenshot."
+            % (standing, owed),
+            priority="4",
+        )
+    elif beat == today and hour < AWAKE_TO:
         notify(
             "ARBITER d%d %s" % (day, tier),
-            "standing=%d owed=%d | %s" % (standing, owed, voice[:140]),
+            "standing=%d owed=%d | %s" % (standing, owed, (voice or "")[:140]),
         )
-        print(json.dumps({"day": day, "verdict": verdict, "voice": voice}))
-    else:
-        print("quiet")
 
     state["standing"] = standing
     state["units_owed"] = owed
@@ -367,6 +387,7 @@ def main():
     state["day"] = day
     state["tier"] = tier
     save_json(STATE, state)
+    print(json.dumps({"day": day, "verdict": verdict, "unfiled": unfiled}))
 
 
 if __name__ == "__main__":
