@@ -8,6 +8,7 @@ MODEL = os.environ.get("ARBITER_MODEL", "venice-uncensored")
 API = "https://api.venice.ai/api/v1/chat/completions"
 KEY = os.environ.get("VENICE_API_KEY", "")
 NTFY = os.environ.get("NTFY_TOPIC", "")
+FORCE = os.environ.get("ARBITER_FORCE") == "1"
 
 MAX_CONTACTS = 4
 MIN_GAP_MIN = 45
@@ -20,25 +21,19 @@ He works from home 03:00-17:00, 7 days a week. Sleep 18:30-03:00, Carol-enforced
 Standing 0-1000. Be Carol-grade: unembarrassed, non-negotiable, never forgets."""
 
 def now(): return datetime.datetime.now(TZ)
-
 def load_json(p, d=None):
     try:
         with open(p) as f: return json.load(f)
     except Exception: return d
-
 def save_json(p, o):
     with open(p, "w") as f: json.dump(o, f, indent=2)
-
 def append(entry):
     with open("ledger.jsonl", "a") as f: f.write(json.dumps(entry) + "\n")
-
 def seq_next():
     try:
         with open("ledger.jsonl") as f: return sum(1 for _ in f)
     except FileNotFoundError: return 0
-
 def in_win(h, s, e): return (s <= h < e) if s <= e else (h >= s or h < e)
-
 def window(h):
     if in_win(h, 18.5, 3.0): return "sleep"
     if in_win(h, 3.0, 3.5): return "wake"
@@ -77,34 +72,36 @@ def main():
         st["last_day"] = today; st["fired"] = []; st["contacts_today"] = 0
     st.setdefault("fired", []); st.setdefault("contacts_today", 0)
 
-    if w == "sleep":
-        save_json("state.json", st); return
-
-    slot = None
-    if 3.0 <= h < 3.5 and "MORNING" not in st["fired"]: slot = "MORNING"
-    elif 17.0 <= h < 17.5 and "CHECK" not in st["fired"]: slot = "CHECK"
-    elif w == "work" and "MID" not in st["fired"] and random.random() < 0.15: slot = "MID"
-    elif w == "personal" and "EXTRA" not in st["fired"] and random.random() < 0.10: slot = "EXTRA"
-    if not slot: save_json("state.json", st); return
-    if st["contacts_today"] >= MAX_CONTACTS: save_json("state.json", st); return
-
-    lc = st.get("last_contact")
-    if lc:
-        try:
-            if (n - datetime.datetime.fromisoformat(lc)).total_seconds() / 60 < MIN_GAP_MIN:
-                save_json("state.json", st); return
-        except Exception: pass
+    if FORCE:
+        slot = "FORCE"
+    else:
+        if w == "sleep": save_json("state.json", st); return
+        slot = None
+        if 3.0 <= h < 3.5 and "MORNING" not in st["fired"]: slot = "MORNING"
+        elif 17.0 <= h < 17.5 and "CHECK" not in st["fired"]: slot = "CHECK"
+        elif w == "work" and "MID" not in st["fired"] and random.random() < 0.15: slot = "MID"
+        elif w == "personal" and "EXTRA" not in st["fired"] and random.random() < 0.10: slot = "EXTRA"
+        if not slot: save_json("state.json", st); return
+        if st["contacts_today"] >= MAX_CONTACTS: save_json("state.json", st); return
+        lc = st.get("last_contact")
+        if lc:
+            try:
+                if (n - datetime.datetime.fromisoformat(lc)).total_seconds() / 60 < MIN_GAP_MIN:
+                    save_json("state.json", st); return
+            except Exception: pass
 
     prompts = {
         "MORNING": "Issue Day %s's assignment in 2 sentences. Standing %s. Direct." % (st.get("term_day"), st.get("standing")),
         "CHECK": "Ask Robby for his six-line daily report: BODY, MIND, CRAFT, ORDER, STEWARDSHIP. Mention ORDER's protected block. 3 sentences max.",
         "MID": "One-line ORDER nudge: has the 25-minute protected block happened yet?",
         "EXTRA": "Short check-in, 1-2 sentences. Standing %s." % st.get("standing"),
+        "FORCE": "Send a test contact confirming the heartbeat is live. 2 sentences. Day %s, standing %s." % (st.get("term_day"), st.get("standing")),
     }
-    cls = {"MORNING": 2, "CHECK": 2, "MID": 1, "EXTRA": 1}[slot]
+    cls = {"MORNING": 2, "CHECK": 2, "MID": 1, "EXTRA": 1, "FORCE": 2}[slot]
     body = ask(prompts[slot])
 
-    st["fired"].append(slot); st["contacts_today"] += 1
+    if slot != "FORCE": st["fired"].append(slot)
+    st["contacts_today"] = st.get("contacts_today", 0) + 1
     st["last_contact"] = n.isoformat()
     append({"seq": seq_next(),
             "ts": n.astimezone(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
