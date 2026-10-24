@@ -1,9 +1,9 @@
 {
-  "term_day": 1,
+  "term_day": 2,
   "start": "2026-10-24",
   "end": "2028-10-23",
   "tz": "America/Chicago",
-  "standing": 500,
+  "standing": 528,
   "tier": "STANDARD",
   "streak": 0,
   "resets": 0,
