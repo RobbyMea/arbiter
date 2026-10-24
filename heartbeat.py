@@ -4,7 +4,7 @@ import os, json, datetime, urllib.request, urllib.error
 from zoneinfo import ZoneInfo
 
 TZ = ZoneInfo("America/Chicago")
-MODEL = os.environ.get("ARBITER_MODEL", "venice-uncensored")
+MODEL = os.environ.get("ARBITER_MODEL", "venice-uncensored-1-2")
 API = "https://api.venice.ai/api/v1/chat/completions"
 MODELS = "https://api.venice.ai/api/v1/models"
 KEY = os.environ.get("VENICE_API_KEY", "").strip()
