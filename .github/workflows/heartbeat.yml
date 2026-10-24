@@ -3,6 +3,10 @@ on:
   schedule:
     - cron: '*/15 * * * *'
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force a contact'
+        default: '1'
 permissions:
   contents: write
 concurrency:
@@ -19,6 +23,7 @@ jobs:
         env:
           VENICE_API_KEY: ${{ secrets.VENICE_API_KEY }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          ARBITER_FORCE: ${{ inputs.force }}
         run: python heartbeat.py
       - name: commit
         run: |
