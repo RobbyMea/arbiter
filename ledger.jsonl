@@ -3,4 +3,5 @@
 {"seq":2,"ts":"2026-10-24T12:30:00Z","type":"ASSIGNMENT_COMPLETE","payload":"Day 1: private repo arbiter created, three files committed. Externalization complete.","prev":null,"hash":null}
 {"seq":3,"ts":"2026-10-24T13:00:00Z","type":"MICRO_CHECK","payload":"Day 1: BODY met, MIND met, CRAFT met, ORDER missed, STEWARDSHIP met, TRUTH met. delta +28. standing 528.","prev":null,"hash":null}
 {"seq":4,"ts":"2026-10-24T14:00:00Z","type":"AMENDMENT","payload":"Article XIX recipient designated: Feeding America. Forfeits due within 48h. Stake ring-fenced separately.","prev":null,"hash":null}
+{"seq":5,"ts":"2026-10-24T15:15:00Z","type":"AMENDMENT","payload":"v1.3: TRUTH moved to weekly, judged by Arbiter not self-reported. Truth violation -50, escalating -100, hard reset on 3rd. Two random spot-checks per week, may target past days.","prev":null,"hash":null}
 {"seq":6,"ts":"2026-10-24T15:30:00Z","type":"AMENDMENT","payload":"Sleep window corrected to 18:30-03:00 (Carol-enforced). Discretion rule: push-only in personal, no calls except work hours. Stake stays self-held (Carol unaware).","prev":null,"hash":null}
