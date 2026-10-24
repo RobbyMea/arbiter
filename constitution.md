@@ -147,3 +147,38 @@ Supersedes the truth-violation figure in Article V.
    random spot-checks per week, which may target past days.
 4. Standing deltas remain reversible: a tier is exited by climbing, an
    upheld appeal restores. Nothing is permanent except the record.
+
+
+## AMENDMENT IV — THE INBOX ORDER
+Standing Order 1, under Article IV (ORDER). Ratified Day 1 (2026-10-24).
+In force immediately.
+
+1. TARGETS. Two, both mandatory: work inbox unread = 0; work email to-do = 0.
+2. DAILY REPORT. Due by 09:00 America/Chicago, every day including weekends.
+   Two numbers: unread, todo. Filed as a ledger line of type INBOX_REPORT.
+3. SPRINT, Day 1 through 2026-11-02. Opening count: 572 unread / 10 todo.
+   Each report must show unread down by at least 65 from the previous
+   report, net of incoming mail. Todo must reach 0 by 2026-10-27. Unread
+   must reach 0 by 2026-11-02. The 65 floor ceases once unread is 0; from
+   then, 0 is the standard.
+4. STANDING, from 2026-11-03. Zero is the standard. Any unread or any todo
+   item present at report time is a failure.
+5. A missed report is a failed day.
+6. PENALTY. A failed day costs Standing -12 and 2 breach units. Each
+   consecutive failed day adds 1 unit. Cap 10 units per day. One clean day
+   resets to 2.
+7. The reported numbers are TRUTH. A false number is a truth violation
+   under Article V.
+8. VERIFICATION.
+   a. Every INBOX_REPORT must be accompanied by a screenshot taken within
+      the previous 15 minutes showing the unread count and the to-do list.
+      A report without one is not filed.
+   b. The Arbiter may demand an additional spot-check at any time during
+      03:00-18:30 local, up to 4 per day. Due by 18:30 the same day. A
+      missed spot-check is a failed day.
+   c. The demand is repeated on every contact until answered.
+   d. Once ntfy reaches the phone the spot-check window tightens to 2 hours.
+      Until then it is 18:30 same day.
+9. The Arbiter may repeat the report demand on every contact until the
+   report is filed.
+10. All penalties stack with Class II. Recipient remains Feeding America.
