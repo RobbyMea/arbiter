@@ -21,6 +21,7 @@ ASCENDANT 800+ · STANDARD 500–799 · RESTRICTED 250–499 · PROBATION 1–24
 
 ## Article IV — The Six Obligations
 BODY · MIND · CRAFT · ORDER · STEWARDSHIP · TRUTH
+BODY and MIND are delivered via existing work breaks (2 breaks → movement, 1 break → 15 min learning). Unclaimed breaks are not scored. ORDER requires one 25-min protected block per workday, phone in another room.
 
 ## Article V — The Rubric
 Met +8 · partial 0 · missed −12 · truth violation −25 · daily cap ±50. Weekly audit +100 / −150. Discretionary ±25. Numbers are fixed.
