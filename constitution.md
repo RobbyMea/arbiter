@@ -126,8 +126,9 @@ and the vesting schedule of v1.2.
    forfeit, plus post-mortem." You do not get to walk for free.
 5. All forfeits remain to Feeding America, paid within 48 hours.
 6. No clause of this Amendment may be softened mid-term.
+7. 
 
-7. ## AMENDMENT III — THE RIDERS & TRUTH RUBRIC
+8. ## AMENDMENT III — THE RIDERS & TRUTH RUBRIC
 Ratified Day 1 (2026-10-24). Article III's tiers gain their lived content.
 Supersedes the truth-violation figure in Article V.
 
