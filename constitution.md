@@ -126,3 +126,23 @@ and the vesting schedule of v1.2.
    forfeit, plus post-mortem." You do not get to walk for free.
 5. All forfeits remain to Feeding America, paid within 48 hours.
 6. No clause of this Amendment may be softened mid-term.
+
+7. ## AMENDMENT III — THE RIDERS & TRUTH RUBRIC
+Ratified Day 1 (2026-10-24). Article III's tiers gain their lived content.
+Supersedes the truth-violation figure in Article V.
+
+1. The tier Riders are written into the Contract and are enforceable:
+   - RESTRICTED (250-499): no discretionary spending; no entertainment
+     until the day's obligations are filed; one project at a time.
+   - PROBATION (1-249): obligations only. No new commitments, no new
+     projects, no optional social plans. Maximum contact frequency.
+   - RESET (0): everything non-essential stops. Privileges return only at
+     Standing 250.
+2. Riders are self-executing. No fresh ruling is required to apply one.
+   Entering a tier applies it.
+3. Article V's "truth violation -25" is superseded by v1.3 (ledger seq 5):
+   truth violation -50, escalating to -100 on the second, hard reset on the
+   third. TRUTH is judged weekly by the Arbiter, not self-reported. Two
+   random spot-checks per week, which may target past days.
+4. Standing deltas remain reversible: a tier is exited by climbing, an
+   upheld appeal restores. Nothing is permanent except the record.
