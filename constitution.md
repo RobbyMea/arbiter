@@ -111,3 +111,18 @@ All other terms survive.
 | 541 | 2028-04-17 | $55 | $2,200 | $550 |
 | 631 | 2028-07-16 | $60 | $2,400 | $600 |
 | 721 | 2028-10-14 | $65 | $2,600 | $650 |
+
+## AMENDMENT II — VESTING & EXIT COST
+Ratified Day 1 (2026-10-24). Supersedes the Class II sentence of Article XIX
+and the vesting schedule of v1.2.
+
+1. Article XIX's Class II sentence is replaced by: "Class II per Amendment I."
+2. The four-tranche vesting of v1.2 is void. There is one stake: 40 units at
+   the unit in force, topped up within 3 days of each escalation step. A
+   missed top-up is itself a Class II breach.
+3. RESET forfeits the full stake. PROBATION forfeits 10 units.
+4. WITHDRAWAL now forfeits the full stake. Article XVII's exit cost is amended
+   from "Standing to 0 plus post-mortem" to "Standing to 0, full stake
+   forfeit, plus post-mortem." You do not get to walk for free.
+5. All forfeits remain to Feeding America, paid within 48 hours.
+6. No clause of this Amendment may be softened mid-term.
