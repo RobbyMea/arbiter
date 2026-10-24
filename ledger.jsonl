@@ -2,3 +2,4 @@
 {"seq":1,"ts":"2026-10-24T11:20:00Z","type":"RATIFICATION","payload":"Robby Mears ratified v1.0 FINAL. Class II v1.2. Hatch CLOSED.","prev":null,"hash":null}
 {"seq":2,"ts":"2026-10-24T12:30:00Z","type":"ASSIGNMENT_COMPLETE","payload":"Day 1: private repo arbiter created, three files committed. Externalization complete.","prev":null,"hash":null}
 {"seq":3,"ts":"2026-10-24T13:00:00Z","type":"MICRO_CHECK","payload":"Day 1: BODY met, MIND met, CRAFT met, ORDER missed, STEWARDSHIP met, TRUTH met. delta +28. standing 528.","prev":null,"hash":null}
+{"seq":4,"ts":"2026-10-24T14:00:00Z","type":"AMENDMENT","payload":"Article XIX recipient designated: Feeding America. Forfeits due within 48h. Stake ring-fenced separately.","prev":null,"hash":null}
