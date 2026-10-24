@@ -290,8 +290,10 @@ def main():
 
     standing = max(0, min(1000, standing))
     tier = tier_for(standing)
-    if tier in ("RESTRICTED", "PROBATION", "RESET"):
+
+    if tier in ("RESTRICTED", "PROBATION", "RESET") and state.get("rider_day") != today:
         owed += 1
+        state["rider_day"] = today
 
     voice = speak(build_prompt(day, win, tier, standing, unit, events, unread, todo, owed))
 
@@ -315,6 +317,7 @@ def main():
     state["units_owed"] = owed
     state["last_beat"] = today
     state["day"] = day
+    state["tier"] = tier
     save_json(STATE, state)
 
     notify(
